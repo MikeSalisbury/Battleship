@@ -1,8 +1,80 @@
 class Board
+SHIPS = {
+  Aircraft_Carrier: 5,
+  Battleship: 4,
+  Submarine: 3,
+  Destroyer: 3,
+  Patrol_Boat: 2
+}
+
 attr_accessor :grid
 
-  def initialize(grid = Board.default_grid)
-      @grid = grid
+def initialize(grid = Board.default_grid)
+    @grid = grid
+    @initial_pos = []
+end
+
+def setup(ship_count = 5)
+  ship_count.times {place_random_ship}
+  @initial_pos.each do |pos|
+    until extend_ship(pos)
+      next
+    end
+  end
+end
+
+# selects random ship to build from SHIPS, returns the size of the ship
+  def random_ship
+    SHIPS[SHIPS.keys.sample]
+  end
+
+# extends ship from a given position in a random or given direction
+  def extend_ship(pos, direction = ship_direction, size = nil)
+    # this should be an option hash for direction and size
+    possible_ship = []
+    x, y = pos
+
+    if size.nil?
+      size = random_ship
+    end
+
+    if direction == "N"
+      (size-1).times do
+        x -= 1
+        possible_ship << [x, y]
+      end
+
+    elsif direction == "S"
+      (size-1).times do
+        x += 1
+        possible_ship << [x, y]
+      end
+
+    elsif direction == "W"
+      (size-1).times do
+        y -= 1
+        possible_ship << [x, y]
+      end
+
+    elsif direction == "E"
+      (size-1).times do
+        y += 1
+        possible_ship << [x, y]
+      end
+    end
+
+    if possible_ship.all? {|pos| self[pos].nil?} &&
+      x.between?(0, @grid.length) &&
+      y.between?(0, @grid.length)
+      possible_ship.each {|pos| self[pos] = :s}
+      return true
+    else
+      return false
+    end
+  end
+
+  def ship_direction
+    ["N", "S", "W", "E"].sample
   end
 
   def self.default_grid
@@ -59,10 +131,13 @@ attr_accessor :grid
       pos = [rand(@grid.length), rand(@grid.length)]
       if empty?(pos)
         @grid[pos[0]][pos[1]] = :s
+        @initial_pos << pos
       end
     end
 
   end
+
+
 
   def won?
     # @grid.each do |row|

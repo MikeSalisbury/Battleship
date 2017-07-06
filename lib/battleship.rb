@@ -8,8 +8,6 @@ class BattleshipGame
     @player = player
     @board = board
 
-    2.times { @board.place_random_ship }
-
   end
 
   def attack(pos)
@@ -36,6 +34,7 @@ class BattleshipGame
   end
 
   def play
+    @board.setup
     p "Welcome to Battleship!"
     until self.game_over?
       @board.display
