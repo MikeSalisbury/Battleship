@@ -18,9 +18,22 @@ def setup(ship_count = 5)
   ship_count.times {place_random_ship}
   @initial_pos.each do |pos|
     until extend_ship(pos)
-      next
     end
   end
+end
+
+def place_random_ship
+  if self.full?
+    raise "The board is full!!"
+  else
+    pos = [rand(@grid.length), rand(@grid.length)]
+    if empty?(pos)
+
+      @grid[pos[0]][pos[1]] = :s
+      @initial_pos << pos
+    end
+  end
+
 end
 
 # selects random ship to build from SHIPS, returns the size of the ship
@@ -38,34 +51,32 @@ end
       size = random_ship
     end
 
-    if direction == "N"
+    if direction == "N" && (x - size - 1) >= 0
       (size-1).times do
         x -= 1
         possible_ship << [x, y]
       end
 
-    elsif direction == "S"
+    elsif direction == "S" && (x + size - 1) <= @grid.length-1
       (size-1).times do
         x += 1
         possible_ship << [x, y]
       end
 
-    elsif direction == "W"
+    elsif direction == "W" && (y - size - 1) >= 0
       (size-1).times do
         y -= 1
         possible_ship << [x, y]
       end
 
-    elsif direction == "E"
+    elsif direction == "E" && (y + size - 1) <= @grid.length-1
       (size-1).times do
         y += 1
         possible_ship << [x, y]
       end
     end
 
-    if possible_ship.all? {|pos| self[pos].nil?} &&
-      x.between?(0, @grid.length) &&
-      y.between?(0, @grid.length)
+    if possible_ship.all? {|pos| self[pos].nil?} && possible_ship.length >= 1
       possible_ship.each {|pos| self[pos] = :s}
       return true
     else
@@ -120,24 +131,9 @@ end
   end
 
   def [](pos)
-    x,y = pos
+    x, y = pos
     @grid[x][y]
   end
-
-  def place_random_ship
-    if self.full?
-      raise "The board is full!!"
-    else
-      pos = [rand(@grid.length), rand(@grid.length)]
-      if empty?(pos)
-        @grid[pos[0]][pos[1]] = :s
-        @initial_pos << pos
-      end
-    end
-
-  end
-
-
 
   def won?
     # @grid.each do |row|
